@@ -45,12 +45,18 @@ class Scraper(CareerjetAPIClient):
         return results
     
     def _get_full_description(self, url):
+        """Given a url for a careerjet job listing. This function will
+        scrape the full job description form the page.
+        """
         html_page = requests.get(url)
         soup = BeautifulSoup(html_page.content, 'html.parser')
         description = soup.find('section', class_='content').text
         return description
     
     def _append_full_descriptions(self, results):
+        """Given the results from a search, itterates over all jobs
+        and adds a `full_description` attribute with the full job description.
+        """
         jobs = results['jobs']
         for index, job in enumerate(jobs):
             url = job['url']
@@ -61,6 +67,7 @@ class Scraper(CareerjetAPIClient):
         return results
     
     def scrape_page(self, page=1):
-        results = self._search(page=page)
+        """Given a page number, returns the full page of job posting results."""
+        results = self.search(page=page)
         results_with_full_description = self._append_full_descriptions(results)
         return results_with_full_description
