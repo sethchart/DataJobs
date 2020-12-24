@@ -10,27 +10,11 @@ class JobsDb(object):
         CREATE TABLE IF NOT EXISTS jobs (
             id INTEGER PRIMARY KEY,
             title TEXT NOT NULL,
-            description TEXT NOT NULL,
-            datetime TEXT NOT NULL,
-            url TEXT NOT NULL
+            url TEXT NOT NULL,
+            description TEXT NOT NULL
         )
         """
         self.cur.execute(jobs_create_query)
-        salary_create_query = """
-        CREATE TABLE IF NOT EXISTS salary (
-            job_id INTEGER,
-            salary REAL,
-            salary_min REAL,
-            salary_max REAL,
-            salary_type TEXT,
-            salary_currency_code TEXT,
-            FOREIGN KEY (job_id)
-                REFERENCES jobs (id)
-                    ON DELETE CASCADE
-                    ON UPDATE CASCADE
-        )
-        """
-        self.cur.execute(salary_create_query)
  
     def close(self):
         """Closes the cursor and connection created by initstantiating a JobsDb object."""
@@ -71,7 +55,7 @@ class JobsDb(object):
         Keyword Arguments:
         query -- SQL query formated as a string.
         """
-        df = pd.read_sql(query, self.conn)
+        df = pd.read_sql(query, self.conn, index='id')
         return df
 
     def load_table_as_df(self, table_name):

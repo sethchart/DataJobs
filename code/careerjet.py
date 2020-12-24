@@ -1,80 +1,75 @@
-import json
 import requests
-from careerjet_api import CareerjetAPIClient
-from bs4 import BeautifulSoup
-from fake_useragent import UserAgent
-from numpy import random
 import time
+from bs4 import BeautifulSoup
+from fake_headers import Headers
+from numpy import random
+from JobsDb import JobsDb
 
-class Scraper(CareerjetAPIClient):
-    """Provides tools for scraping careerjet.com"""
+class Scraper(object):
 
-    def __init__(self,
-                 keywords = None,
-                 location = 'USA',
-                 display_url = 'https:/www.example.com',
-                 locale_code="en_US",
-                 path_to_secrets='/home/schart/.secrets.json'):
-        super().__init__(locale_code=locale_code)
-        self.keywords = keywords
-        self.location = location
-        self.display_url = display_url
-        self.path_to_secrets = path_to_secrets
-        slef.user_agent = UserAgent()
+    def __init__(self):
+        self.db = JobsDb()
+        self.header_generator = Headder()
 
-    def search(self, page=1):
-        """Executes a search on careerjet.com and returns results as json.
-        search keywords and location are specified at class instantiation.
+    def get_page(url, params=None):
+        headers = self.header_generator.generate()
+        page = requests.get(url, params=params, headers=headers).content
+        return page
 
-        Parameters:
-        page -- specify what page of the search results to return (default 1)
-
-        Returns:
-        json formatted contents of the selected page. Results include up to
-        twenty job posting results.
-        """
-        with open(self.path_to_secrets) as f:
-            affid = json.load(f)['careerjet']['affid']
-        search_params = {
-            'affid': affid,
-            'user_ip': requests.get('https://icanhazip.com').text.strip('\n'),
-            'url': self.display_url,
-            'user_agent': self.user_agent.random,
-            'location': self.location,
-            'keywords': self.keywords,
+    def get_search_page(page_number=1):
+        params = {
+            'l': 'USA',
             'sort': 'date',
-            'page': page
+            'p': page_number
         }
-        results = super().search(search_params)
-        return results
+        url = 'https://www.careerjet.com/search/jobs'
+        page = self.get_page(url, params=params)
+        return page
 
-    def _get_full_description(self, url):
+    def get_jobs_from_page(page):
+        soup = BeautifulSoup(page, 'html.parser')
+        jobs = soup.find_all('article', class_='job clicky')
+        return jobs
+
+    def get_link_from_job(job):
+        raw_link = job.find('h2').find('a', href=True)
+        url = 'https://www.careerjet.com'+raw_link['href']
+        title = raw_link['title']
+        link = {
+            'url': url,
+            'title': title
+        }
+        return link
+
+    def get_description(url):
         """Given a url for a careerjet job listing. This function will
-        scrape the full job description form the page.
+        scrape the full job description from the page.
         """
         wait_time = random.rand(1)
         time.sleep(wait_time)
-        headers = {'user-agent': user_agent.random}
-        html_page = requests.get(url, headers)
-        soup = BeautifulSoup(html_page.content, 'html.parser')
+        page = self.get_page(url)
+        soup = BeautifulSoup(page, 'html.parser')
         description = soup.find('section', class_='content').text
         return description
 
-    def _append_full_descriptions(self, results):
-        """Given the results from a search, iterates over all jobs
-        and adds a `full_description` attribute with the full job description.
-        """
-        jobs = results['jobs']
-        for index, job in enumerate(jobs):
-            url = job['url']
-            full_description = self._get_full_description(url)
-            job['full_description'] = full_description
-            jobs[index] = job
-        results['jobs'] = jobs
-        return results
+    def scrape_search_page(page_number=1):
+        page = self.get_search_page(page_number=page_number)
+        jobs = self.get_jobs_from_page(page)
+        for job in jobs:
+            try:
+                link = get_link_from_job(job)
+                title = link['title']
+                url = link['url']
+                description = self.get_description(url)
+                job_dict = {
+                    'title': title,
+                    'url': url,
+                    'description': description
+                }
+                self.db.write_row_to_table(table_name='jobs', row_dict=job_dict)
+            except:
+                continue
 
-    def scrape_page(self, page=1):
-        """Given a page number, returns the full page of job posting results."""
-        results = self.search(page=page)
-        results_with_full_description = self._append_full_descriptions(results)
-        return results_with_full_description
+    def scrape_site(number_of_pages=self.number_of_pages):
+        for page_number in range(1, number_of_pages+1):
+            scrape_search_page(page_number=page_number)
