@@ -2,7 +2,7 @@ import sqlite3
 import pandas as pd
 
 class JobsDb(object):
-    
+
     def __init__(self):
         self.conn = sqlite3.connect('../data/jobs.sqlite')
         self.cur = self.conn.cursor()
@@ -15,16 +15,16 @@ class JobsDb(object):
         )
         """
         self.cur.execute(jobs_create_query)
- 
+
     def close(self):
-        """Closes the cursor and connection created by initstantiating a JobsDb object."""
+        """Closes the cursor and connection created by instantiating a JobsDb object."""
         self.cur.close()
         self.conn.close()
-  
+
     def list_tables(self):
         """Queries the database and returns a list of table names."""
         query = """
-            SELECT name 
+            SELECT name
             FROM sqlite_master
             WHERE type='table';
         """
@@ -34,9 +34,9 @@ class JobsDb(object):
 
     def list_column_names(self, table_name):
         """Given the name of a table in the data base, this function returns a list of column names.
-        
+
         Keyword Arguments:
-        table_name -- name of the table whoes columns will be listed.
+        table_name -- name of the table whose columns will be listed.
         
         Use list_tables method to obtain a list of tables.
         """
@@ -55,7 +55,7 @@ class JobsDb(object):
         Keyword Arguments:
         query -- SQL query formated as a string.
         """
-        df = pd.read_sql(query, self.conn, index='id')
+        df = pd.read_sql(query, self.conn)
         return df
 
     def load_table_as_df(self, table_name):
