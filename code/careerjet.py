@@ -1,84 +1,53 @@
-import requests
-import time
+from selenium import webdriver
 from bs4 import BeautifulSoup
-from fake_headers import Headers
-from numpy import random
-from JobsDb import JobsDb
-import timeit
+from time import sleep
 
 class Scraper(object):
 
-    def __init__(self, number_of_pages):
-        self.header_generator = Headers()
-        self.number_of_pages = number_of_pages
-        self.db = JobsDb()
+    def __init__(self):
+        self.browser = None
+        self._initialize_scraper()
 
-    def get_page(self, url, params=None):
-        headers = self.header_generator.generate()
-        page = requests.get(url, params=params, headers=headers).content
-        return page
-
-    def get_search_page(self, page_number=1):
-        params = {
-            's': 'data',
-            'l': 'USA',
-            'sort': 'date',
-            'p': page_number
+    def scrape_page(self):
+        """Scrapes the current job posting"""
+        soup = self._get_current_page_soup()
+        page_data = {
+            'title': self._get_title(soup),
+            'url': self.browser.current_url(),
+            'description': self._get_description()
         }
-        url = 'https://www.careerjet.com/search/jobs'
-        page = self.get_page(url, params=params)
-        return page
+        return page_data
 
-    def get_jobs_from_page(self, page):
-        soup = BeautifulSoup(page, 'html.parser')
-        jobs = soup.find_all('article', class_='job clicky')
-        return jobs
+    def next_page(self):
+        """Advances the browser to the next job posting"""
+        next_button = self.browser.find_elements_by_class_name('next')
+        next_button.click()
 
-    def get_link_from_job(self, job):
-        raw_link = job.find('h2').find('a', href=True)
-        url = 'https://www.careerjet.com'+raw_link['href']
-        title = raw_link['title']
-        link = {
-            'url': url,
-            'title': title
-        }
-        return link
+    @staticmethod
+    def _get_title(soup):
+        """Extracts the job title from the current posting"""
+        title = soup.find('h1').text
+        return title
 
-    def get_description(self, url):
-        """Given a url for a careerjet job listing. This function will
-        scrape the full job description from the page.
+    @staticmethod
+    def _get_description(soup):
+        """Extracts the description from the current posting"""
+         description = soup.find('article', class_='content').text
+         return description
+
+    def _get_current_page_soup(self):
+        """Parses the current job posting using BeautifulSoup"""
+        page = self.browser.page_source
+        soup = BeautifulSoup(page, 'parser.html')
+        return soup
+
+    def _initialize_scraper(self):
+        """Opens a new browser with the first page of creerjet search results.
+        Then, clicks on the first job posting. Once this method has run, the
+        scraper object is ready to scrape the first job listing.
         """
-        wait_time = random.rand(1)*0.1
-        time.sleep(wait_time)
-        page = self.get_page(url)
-        soup = BeautifulSoup(page, 'html.parser')
-        description = soup.find('section', class_='content').text
-        return description
-
-    def scrape_search_page(self, page_number=1):
-        page = self.get_search_page(page_number=page_number)
-        jobs = self.get_jobs_from_page(page)
-        for job in jobs:
-            try:
-                link = self.get_link_from_job(job)
-                title = link['title']
-                url = link['url']
-                description = self.get_description(url)
-                job_dict = {
-                    'title': title,
-                    'url': url,
-                    'description': description
-                }
-                self.db.write_row_to_table(table_name='jobs', row_dict=job_dict)
-            except:
-                continue
-
-    def scrape_site(self):
-        for page_number in range(1, self.number_of_pages+1):
-            start_time = timeit.default_timer()
-            self.scrape_search_page(page_number=page_number)
-            self.db.conn.commit()
-            elapsed = timeit.default_timer() - start_time
-            print(
-                f"Finished scraping page {page_number} of {self.number_of_pages} in {elapsed} seconds."
-            )
+        self.browser = webdriver.Chrome()
+        self.browser.get('https://www.careerjet.com/search/jobs?l=USA&sort=date')
+        first_job_posting = self.browser.find_element_by_class_name('job')
+        first_job_link = first_job_posting.find_element_by_tag_name('a')
+        first_job_link.click()
