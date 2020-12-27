@@ -11,12 +11,17 @@ def main(number_of_pages=2):
         start_time = default_timer()
         sleep(rand(1))
         page_data = scraper.scrape_page()
-        db.write_row_to_table('jobs', page_data)
+        try:
+            db.write_row_to_table('jobs', page_data)
+        except:
+            print(page_data)
+            continue
         scraper.next_page()
         elapsed = default_timer() - start_time
         print(
             f'Scraped page {page+1} of {number_of_pages} pages in {elapsed} seconds'
         )
+        print(page_data)
     db.close()
     scraper.browser.close()
 

@@ -37,7 +37,7 @@ class JobsDb(object):
 
         Keyword Arguments:
         table_name -- name of the table whose columns will be listed.
-
+        
         Use list_tables method to obtain a list of tables.
         """
         query = f"""
@@ -48,10 +48,10 @@ class JobsDb(object):
         return column_names
 
     def load_query_as_df(self, query):
-        """Given a valid SQL query formated as a string,
-        this function returns the output of the query as
+        """Given a valid SQL query formated as a string, 
+        this function returns the output of the query as 
         a pandas dataframe.
-
+        
         Keyword Arguments:
         query -- SQL query formated as a string.
         """
@@ -59,12 +59,12 @@ class JobsDb(object):
         return df
 
     def load_table_as_df(self, table_name):
-        """Given the name of a table in the database,
+        """Given the name of a table in the database, 
         this function loads the table as as pandas dataframe.
-
+        
         Keyword Arguments:
         table_name -- name of tables whoes contents will be returned as a dataframe
-
+        
         Use the list_tables method to obtain a list of tables.
         """
         query = f"""
@@ -72,23 +72,21 @@ class JobsDb(object):
             FROM {table_name};
             """
         df = self.load_query_as_df(query)
-        return df
-
+        return df        
+        
     def write_row_to_table(self, table_name, row_dict):
-        """Given a table name and a dictionary with keys matching table column names
-        and values complying with column datatypes, this function writes a new row
+        """Given a table name and a dictionary with keys matching table column names 
+        and values complying with column datatypes, this function writes a new row 
         to the specified table.
-
-        Keyword Arguments;
+        
+        Keyword Arguments:
         table_name -- name of the table to write to.
         row_dict -- dictionary containing row data.
-
+        
         Use the list_tables method to obtain a list of tables.
         """
         query = f"""
-            INSERT INTO jobs (url, title, description)
-            VALUES ('{row_dict['url']}', '{row_dict['title']}',
-            '{row_dict['description']}');
+            INSERT INTO {table_name} ({', '.join(row_dict.keys())})
+            VALUES {tuple(row_dict.values())};
         """
         self.cur.execute(query)
-        self.conn.commit()
