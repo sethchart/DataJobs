@@ -13,14 +13,15 @@ class Scraper(object):
         soup = self._get_current_page_soup()
         page_data = {
             'title': self._get_title(soup),
-            'url': self.browser.current_url(),
-            'description': self._get_description()
+            'url': self.browser.current_url,
+            'description': self._get_description(soup)
         }
         return page_data
 
     def next_page(self):
         """Advances the browser to the next job posting"""
-        next_button = self.browser.find_elements_by_class_name('next')
+        nav_bar = self.browser.find_element_by_class_name('nav')
+        next_button = nav_bar.find_element_by_class_name('next')
         next_button.click()
 
     @staticmethod
@@ -32,13 +33,13 @@ class Scraper(object):
     @staticmethod
     def _get_description(soup):
         """Extracts the description from the current posting"""
-         description = soup.find('article', class_='content').text
-         return description
+        description = soup.find('section', class_='content').text
+        return description
 
     def _get_current_page_soup(self):
         """Parses the current job posting using BeautifulSoup"""
         page = self.browser.page_source
-        soup = BeautifulSoup(page, 'parser.html')
+        soup = BeautifulSoup(page, 'html.parser')
         return soup
 
     def _initialize_scraper(self):
@@ -47,7 +48,7 @@ class Scraper(object):
         scraper object is ready to scrape the first job listing.
         """
         self.browser = webdriver.Chrome()
-        self.browser.get('https://www.careerjet.com/search/jobs?l=USA&sort=date')
+        self.browser.get('https://www.careerjet.com/search/jobs?l=USA')
         first_job_posting = self.browser.find_element_by_class_name('job')
         first_job_link = first_job_posting.find_element_by_tag_name('a')
         first_job_link.click()
