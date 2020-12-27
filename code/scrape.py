@@ -21,7 +21,6 @@ def main(number_of_pages=2):
         print(
             f'Scraped page {page+1} of {number_of_pages} pages in {elapsed} seconds'
         )
-        print(page_data)
     db.close()
     scraper.browser.close()
 
