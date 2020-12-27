@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
 from bs4 import BeautifulSoup
 from time import sleep
 
@@ -22,7 +23,10 @@ class Scraper(object):
         """Advances the browser to the next job posting"""
         nav_bar = self.browser.find_element_by_class_name('nav')
         next_button = nav_bar.find_element_by_class_name('next')
+        current_url = self.browser.current_url
         next_button.click()
+        wait = WebDriverWait(self.browser, 10)
+        wait.until(lambda x: x.current_url != current_url)
 
     @staticmethod
     def _get_title(soup):
