@@ -13,13 +13,13 @@ def main(number_of_pages=2):
         page_data = scraper.scrape_page()
         try:
             db.write_row_to_table('jobs', page_data)
+            outcome = 'Successfully'
         except:
-            print(page_data)
-            continue
+            outcome = 'Unsuccessfully'
         scraper.next_page()
         elapsed = default_timer() - start_time
         print(
-            f'Scraped page {page+1} of {number_of_pages} pages in {elapsed} seconds'
+            f'{outcome} scraped page {page+1} of {number_of_pages} pages in {elapsed} seconds'
         )
     db.close()
     scraper.browser.close()
