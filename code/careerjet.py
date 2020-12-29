@@ -52,7 +52,7 @@ class Scraper(object):
         scraper object is ready to scrape the first job listing.
         """
         self.browser = webdriver.Chrome()
-        self.browser.get('https://www.careerjet.com/search/jobs?l=USA')
+        self.browser.get('https://www.careerjet.com/search/jobs?l=USA&s=data')
         first_job_posting = self.browser.find_element_by_class_name('job')
         first_job_link = first_job_posting.find_element_by_tag_name('a')
         first_job_link.click()
