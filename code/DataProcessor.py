@@ -88,10 +88,11 @@ def doc_processor(doc):
     doc_tags = doc_pos_tagger(doc_tokens)
     lemmatized_doc = doc_lemmatizer(doc_tags)
     cleaned_doc = clean_doc(lemmatized_doc)
-    processed_doc = combine_grams(cleaned_doc)
-    return processed_doc
+    return cleaned_doc
 
 def data_processor(docs):
     processed_data = [
         doc_processor(doc) for doc in docs
     ]
+    processed_data = combine_grams(processed_data)
+    return processed_data
