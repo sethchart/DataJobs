@@ -24,6 +24,7 @@ def main(number_of_pages=2):
     db.close()
     scraper.browser.close()
 
-number_of_pages = int(input('How many pages would you like to scrape? '))
-main(number_of_pages=number_of_pages)
+if __name__ == "__main__":
+    number_of_pages = int(input('How many pages would you like to scrape? '))
+    main(number_of_pages=number_of_pages)
 
