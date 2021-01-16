@@ -1,5 +1,5 @@
 """
-This module collects metrics for trained LDA models to facilitate model
+This module collects measures for trained LDA models to facilitate model
 selection.
 """
 
@@ -12,10 +12,8 @@ import numpy as np
 np.random.seed(42)
 import pickle
 from tqdm import tqdm
-import plotly.express as px
 from gensim.models import LdaModel, CoherenceModel
-from gensim import corpora
-from gensim.test.utils import datapath
+from itertools import combinations
 
 def get_model(num_topics):
     """get_model. Retrieves a saved trained LDA model from the `model` folder
@@ -121,8 +119,8 @@ def get_coherence(model, texts, dictionary):
     coherence = coherence_model.get_coherence()
     return coherence
 
-def get_metrics(model, texts, dictionary):
-    """get_metrics. Collects Jaccard similarity and coherence for all trained
+def get_measures(texts, dictionary):
+    """get_measures. Collects Jaccard similarity and coherence for all trained
     LDA models.
 
     Parameters
@@ -134,7 +132,7 @@ def get_metrics(model, texts, dictionary):
     dictionary :
         dictionary
     """
-    metrics_list = {
+    measures_list = {
         'n': [],
         'mean_jaccard': [],
         'coherence': []        
@@ -142,7 +140,7 @@ def get_metrics(model, texts, dictionary):
     for n in tqdm(range(2,31)):
         model = get_model(n)
         topics = get_topics(model)
-        metrics_list['n'].append(n)
-        metrics_list['mean_jaccard'].append(mean_jaccard_similarity(topics)),
-        metrics_list['coherence'].append(get_coherence(model, texts, dictionary))
-    return metrics_list
+        measures_list['n'].append(n)
+        measures_list['mean_jaccard'].append(mean_jaccard_similarity(topics)),
+        measures_list['coherence'].append(get_coherence(model, texts, dictionary))
+    return measures_list
