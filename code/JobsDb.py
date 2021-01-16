@@ -1,3 +1,12 @@
+"""
+This module builds a SQLite database to receive job postings from careerjet.com
+and provides methods for reading from and writing to the database.
+"""
+
+__author__ = "Seth Chart"
+__version__ = "0.1.0"
+__license__ = "MIT"
+
 import sqlite3
 import pandas as pd
 
@@ -55,7 +64,7 @@ class JobsDb(object):
         Keyword Arguments:
         query -- SQL query formated as a string.
         """
-        df = pd.read_sql(query, self.conn)
+        df = pd.read_sql(query, self.conn, index_col='id')
         return df
 
     def load_table_as_df(self, table_name):

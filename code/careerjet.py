@@ -1,9 +1,23 @@
+"""
+This module provides the Scraper class, which encapsulates interaction with
+careerjet.com through the selenium webdriver. It provides the key methods
+required for executing a scrape of job postings.
+"""
+
+__author__ = "Seth Chart"
+__version__ = "0.1.0"
+__license__ = "MIT"
+
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from bs4 import BeautifulSoup
 from time import sleep
 
 class Scraper(object):
+    """Scraper. Wraps interactions with careerjet.com through the selenium
+    webdriver.
+    """
+
 
     def __init__(self):
         self.browser = None
