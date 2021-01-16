@@ -167,7 +167,7 @@ def data_processor(docs):
     ]
     return processed_data
 
-def data_combine_phrases(processed_data):
+def data_combine_phrases(processed_data, prefix):
     """data_combine_phrases. Takes a corpus of cleaned documents and combines common phrases into
     bigrams, trigrams, and quadgrams.
 
@@ -175,17 +175,17 @@ def data_combine_phrases(processed_data):
     ----------
     processed_data : list of strings
         Takes output from data_processor.
+    prefix : string
+        prefix to identify saved model.
     """
-    bigram_model = Phrases(processed_data)
-    phrase_model_1= bigram_model.freeze()
-    phrase_model_1.save('../model/phrase_model_1.pkl')
-    quadgram_model = Phrases(phrase_model_1[processed_data], min_count=1)
-    phrase_model_2 = quadgram_model.freeze()
-    phrase_model_2.save('../model/phrase_model_2.pkl')
+    phrase_model_1 = Phrases(processed_data)
+    phrase_model_1.save(f'../model/{prefix}-phrase_model_1.pkl')
+    phrase_model_2 = Phrases(phrase_model_1[processed_data], min_count=1)
+    phrase_model_2.save(f'../model/{prefix}-phrase_model_2.pkl')
     data_phrases = list(phrase_model_2[phrase_model_1[processed_data]])
     return data_phrases
 
-def doc_combine_phrases(processed_doc):
+def doc_combine_phrases(processed_doc, prefix):
     """doc_combine_phrases. Takes a processed document and combines common
     phrases into bigrams, trigrams, and quadgrams. data_combine_phrases must
     run before doc_combine_phrases.
@@ -194,10 +194,12 @@ def doc_combine_phrases(processed_doc):
     ----------
     processed_doc : list of strings
         Takes output from doc_processor.
+    prefix : string
+        prefix to identify saved model.
     """
     try:
-        phrase_model_1 = Phrases.load('../model/phrase_model_1.pkl')
-        phrase_model_2 = Phrases.load('../model/phrase_model_2.pkl')
+        phrase_model_1 = Phrases.load(f'../model/{prefix}-phrase_model_1.pkl')
+        phrase_model_2 = Phrases.load(f'../model/{prefix}-phrase_model_2.pkl')
     except:
         print('Call `data_combine_phrases` on processed data to build a phrase model')
         pass
