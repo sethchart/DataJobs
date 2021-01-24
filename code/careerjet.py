@@ -1,5 +1,6 @@
+#!/usr/bin/env python3
 """
-This module provides the Scraper class, which encapsulates interaction with
+This module provides the Driver class, which encapsulates interaction with
 careerjet.com through the selenium webdriver. It provides the key methods
 required for executing a scrape of job postings.
 """
@@ -12,19 +13,32 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from bs4 import BeautifulSoup
 from time import sleep
+from timeit import default_timer
+from numpy.random import rand
+from job_database import JobsDb
 
-class Scraper(object):
-    """Scraper. Wraps interactions with careerjet.com through the selenium
+class Driver(object):
+    """Driver. Wraps interactions with careerjet.com through the selenium
     webdriver.
     """
 
 
     def __init__(self):
+        """__init__. Opens a new browser with the first page of creerjet search results.
+        Then, clicks on the first job posting. Once this method has run, the
+        Driver object is ready to scrape the first job listing.
+        """
         self.browser = None
-        self._initialize_scraper()
+        self.browser = webdriver.Chrome()
+        self.browser.get('https://www.careerjet.com/search/jobs?l=USA&s=data')
+        first_job_posting = self.browser.find_element_by_class_name('job')
+        first_job_link = first_job_posting.find_element_by_tag_name('a')
+        first_job_link.click()
 
     def scrape_page(self):
-        """Scrapes the current job posting"""
+        """scrape_page. Scrapes the current job posting and returns a
+        dictionary containing job title, job description, and url.
+        """
         soup = self._get_current_page_soup()
         page_data = {
             'title': self._get_title(soup),
@@ -34,7 +48,8 @@ class Scraper(object):
         return page_data
 
     def next_page(self):
-        """Advances the browser to the next job posting"""
+        """next_page. Advances the browser to the next job posting.
+        """
         nav_bar = self.browser.find_element_by_class_name('nav')
         next_button = nav_bar.find_element_by_class_name('next')
         current_url = self.browser.current_url
@@ -44,29 +59,72 @@ class Scraper(object):
 
     @staticmethod
     def _get_title(soup):
-        """Extracts the job title from the current posting"""
+        """_get_title. Extracts the job title from the current posting.
+
+        Parameters
+        ----------
+        soup : bs4.BeautifulSoup
+            BeautifulSoup object containing the contents of the current job
+            posting page. Takes output from _get_current_page_soup.
+        """
         title = soup.find('h1').text
         return title
 
     @staticmethod
     def _get_description(soup):
-        """Extracts the description from the current posting"""
+        """_get_description. Extracts the description from the current
+        posting.
+
+        Parameters
+        ----------
+        soup : bs4.BeautifulSoup
+            BeautifulSoup object containing the contents of the current job
+            posting page. Takes output from _get_current_page_soup.
+        """
         description = soup.find('section', class_='content').text
         return description
 
     def _get_current_page_soup(self):
-        """Parses the current job posting using BeautifulSoup"""
+        """_get_current_page_soup. Extracts html source code for current job
+        posting and returns BeautifulSoup object for further manipulation.
+        """
         page = self.browser.page_source
         soup = BeautifulSoup(page, 'html.parser')
         return soup
 
-    def _initialize_scraper(self):
-        """Opens a new browser with the first page of creerjet search results.
-        Then, clicks on the first job posting. Once this method has run, the
-        scraper object is ready to scrape the first job listing.
-        """
-        self.browser = webdriver.Chrome()
-        self.browser.get('https://www.careerjet.com/search/jobs?l=USA&s=data')
-        first_job_posting = self.browser.find_element_by_class_name('job')
-        first_job_link = first_job_posting.find_element_by_tag_name('a')
-        first_job_link.click()
+
+def scrape(num_job_postings=2):
+    """Summary of scrape. Scrapes `num_job_postings` job postings from
+    careerjet.com.
+
+    Parameters
+    ----------
+    num_job_postings : int (default 2)
+        number of job postings to scrape from careerjet.com.
+    """
+    db = JobsDb()
+    driver = Driver()
+    for page in range(num_job_postings):
+        start_time = default_timer()
+        sleep(rand(1))
+        page_data = driver.scrape_page()
+        try:
+            db.write_row_to_table('jobs', page_data)
+            outcome = 'Successfully'
+        except:
+            outcome = 'Unsuccessfully'
+        try:
+            driver.next_page()
+        except:
+            print('Unable to get next page.')
+            pass
+        elapsed = default_timer() - start_time
+        print(
+            f'{outcome} scraped page {page+1} of {num_job_postings} pages in {elapsed} seconds'
+        )
+    db.close()
+    driver.browser.close()
+
+if __name__ == "__main__":
+    num_job_postings = int(input('How many pages would you like to scrape? '))
+    scrape(num_job_postings=num_job_postings)
