@@ -19,20 +19,20 @@ from job_database import JobsDb
 
 class Driver(object):
     """Driver. Wraps interactions with careerjet.com through the selenium
-    webdriver.
+    web driver.
     """
 
 
     def __init__(self):
-        """__init__. Opens a new browser with the first page of creerjet search results.
+        """__init__. Opens a new browser with the first page of careerjet search results.
         Then, clicks on the first job posting. Once this method has run, the
         Driver object is ready to scrape the first job listing.
         """
         self.browser = None
         self.browser = webdriver.Chrome()
         self.browser.get('https://www.careerjet.com/search/jobs?l=USA&s=data')
-        first_job_posting = self.browser.find_element_by_class_name('job')
-        first_job_link = first_job_posting.find_element_by_tag_name('a')
+        first_job_listing = self.browser.find_element_by_class_name('job')
+        first_job_link = first_job_listing.find_element_by_tag_name('a')
         first_job_link.click()
 
     def scrape_page(self):
