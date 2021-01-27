@@ -34,6 +34,8 @@ class Scraper(object):
         return page_data
 
     def next_page(self):
+        """next_page.
+        """
         """Advances the browser to the next job posting"""
         nav_bar = self.browser.find_element_by_class_name('nav')
         next_button = nav_bar.find_element_by_class_name('next')
