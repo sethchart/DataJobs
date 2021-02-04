@@ -22,7 +22,6 @@ class Driver(object):
     web driver.
     """
 
-
     def __init__(self):
         """__init__. Opens a new browser with the first page of careerjet search results.
         Then, clicks on the first job posting. Once this method has run, the
@@ -58,12 +57,12 @@ class Driver(object):
         wait.until(lambda x: x.current_url != current_url)
 
     @staticmethod
-    def _get_title(soup):
+    def _get_title(soup: BeautifulSoup) -> str:
         """_get_title. Extracts the job title from the current posting.
 
         Parameters
         ----------
-        soup : bs4.BeautifulSoup
+        soup : BeautifulSoup
             BeautifulSoup object containing the contents of the current job
             posting page. Takes output from _get_current_page_soup.
         """
@@ -71,13 +70,13 @@ class Driver(object):
         return title
 
     @staticmethod
-    def _get_description(soup):
+    def _get_description(soup: BeautifulSoup) -> str:
         """_get_description. Extracts the description from the current
         posting.
 
         Parameters
         ----------
-        soup : bs4.BeautifulSoup
+        soup : BeautifulSoup
             BeautifulSoup object containing the contents of the current job
             posting page. Takes output from _get_current_page_soup.
         """
