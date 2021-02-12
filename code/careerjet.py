@@ -12,31 +12,46 @@ __license__ = "MIT"
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from bs4 import BeautifulSoup
-from time import sleep
-from timeit import default_timer
-from numpy.random import rand
-from job_database import JobsDb
 
-class Driver(object):
+class Driver():
     """Driver. Wraps interactions with careerjet.com through the selenium
     web driver.
     """
 
-    def __init__(self):
+    def __init__(self, location: str ='USA', search_term: str ='data'):
         """__init__. Opens a new browser with the first page of careerjet search results.
         Then, clicks on the first job posting. Once this method has run, the
         Driver object is ready to scrape the first job listing.
+
+        Parameters
+        ----------
+        location : str
+            location is a search parameter that allows for regional filtering.
+            (default: USA)
+        search_term : str
+            search_term is a search term for our job posting search. 
+            (default: data)
         """
         self.browser = None
         self.browser = webdriver.Chrome()
-        self.browser.get('https://www.careerjet.com/search/jobs?l=USA&s=data')
+        self.browser.get(f'https://www.careerjet.com/search/jobs?l={location}&s={search_term}')
         first_job_listing = self.browser.find_element_by_class_name('job')
         first_job_link = first_job_listing.find_element_by_tag_name('a')
         first_job_link.click()
 
-    def scrape_page(self):
+    def scrape_page(self) -> dict:
         """scrape_page. Scrapes the current job posting and returns a
         dictionary containing job title, job description, and url.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        dict
+            page_data contains a dictionary containing the job title, job
+            description and url from the current job posting.
+
         """
         soup = self._get_current_page_soup()
         page_data = {
@@ -63,9 +78,15 @@ class Driver(object):
         Parameters
         ----------
         soup : BeautifulSoup
-            BeautifulSoup object containing the contents of the current job
-            posting page. Takes output from _get_current_page_soup.
+            soup BeautifulSoup object containing the contents of the current
+            job posting page. Takes output from _get_current_page_soup.
+
+        Returns
+        -------
+        str
+            tile is the job title form the current job posting.
         """
+
         title = soup.find('h1').text
         return title
 
@@ -77,53 +98,31 @@ class Driver(object):
         Parameters
         ----------
         soup : BeautifulSoup
-            BeautifulSoup object containing the contents of the current job
-            posting page. Takes output from _get_current_page_soup.
+            soup, BeautifulSoup object containing the contents of the current
+            job posting page. Takes output from _get_current_page_soup.
+
+        Returns
+        -------
+        str
+            description is the full job description from the current job
+            posting.
         """
         description = soup.find('section', class_='content').text
         return description
 
-    def _get_current_page_soup(self):
+    def _get_current_page_soup(self) -> BeautifulSoup:
         """_get_current_page_soup. Extracts html source code for current job
         posting and returns BeautifulSoup object for further manipulation.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        BeautifulSoup
+            soup is the BeautifulSoup object containing the contents of the
+            current job posting.
         """
         page = self.browser.page_source
         soup = BeautifulSoup(page, 'html.parser')
         return soup
-
-
-def scrape(num_job_postings=2):
-    """Summary of scrape. Scrapes `num_job_postings` job postings from
-    careerjet.com.
-
-    Parameters
-    ----------
-    num_job_postings : int (default 2)
-        number of job postings to scrape from careerjet.com.
-    """
-    db = JobsDb()
-    driver = Driver()
-    for page in range(num_job_postings):
-        start_time = default_timer()
-        sleep(rand(1))
-        page_data = driver.scrape_page()
-        try:
-            db.write_row_to_table('jobs', page_data)
-            outcome = 'Successfully'
-        except:
-            outcome = 'Unsuccessfully'
-        try:
-            driver.next_page()
-        except:
-            print('Unable to get next page.')
-            pass
-        elapsed = default_timer() - start_time
-        print(
-            f'{outcome} scraped page {page+1} of {num_job_postings} pages in {elapsed} seconds'
-        )
-    db.close()
-    driver.browser.close()
-
-if __name__ == "__main__":
-    num_job_postings = int(input('How many pages would you like to scrape? '))
-    scrape(num_job_postings=num_job_postings)
