@@ -14,14 +14,14 @@ from time import sleep
 from numpy.random import rand
 
 
-def scrape(num_job_postings=2):
-    """Summary of scrape. Scrapes `num_job_postings` job postings from
-    careerjet.com.
+def scrape(num_job_postings: int = 2):
+    """scrape. Scrapes the selected number of job postings from careerjet.com.
 
     Parameters
     ----------
-    num_job_postings : int (default 2)
-        number of job postings to scrape from careerjet.com.
+    num_job_postings : int (default: 2)
+        num_job_postings is the number of job postings that should be scraped
+        during the session.
     """
     db = JobsDb()
     driver = Driver()
