@@ -1,4 +1,4 @@
-# ~/usr/bin/env python3
+#! ~/usr/bin/env python3
 """This script executes a scrape of job postings from careerjet.com and stores
 postings in an sqlite3 database.
 """
