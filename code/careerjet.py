@@ -13,15 +13,16 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from bs4 import BeautifulSoup
 
+
 class Driver():
     """Driver. Wraps interactions with careerjet.com through the selenium
     web driver.
     """
 
-    def __init__(self, location: str ='USA', search_term: str ='data'):
-        """__init__. Opens a new browser with the first page of careerjet search results.
-        Then, clicks on the first job posting. Once this method has run, the
-        Driver object is ready to scrape the first job listing.
+    def __init__(self, location: str = 'USA', search_term: str = 'data'):
+        """__init__. Opens a new browser with the first page of careerjet
+        search results. Then, clicks on the first job posting. Once this method
+        has run, the Driver object is ready to scrape the first job listing.
 
         Parameters
         ----------
@@ -29,7 +30,7 @@ class Driver():
             location is a search parameter that allows for regional filtering.
             (default: USA)
         search_term : str
-            search_term is a search term for our job posting search. 
+            search_term is a search term for our job posting search.
             (default: data)
         """
         self.browser = None
