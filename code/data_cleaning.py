@@ -6,17 +6,16 @@ __author__ = "Seth Chart"
 __version__ = "0.1.0"
 __license__ = "MIT"
 
-import numpy as np
 from nltk import pos_tag
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.corpus import stopwords, wordnet
 from nltk.stem.wordnet import WordNetLemmatizer
 from gensim.models import Phrases
-from gensim import corpora, models
 
 lemmatizer = WordNetLemmatizer()
 
-def doc_tokenizer(doc):
+
+def doc_tokenizer(doc: str) -> list[list[str]]:
     """doc_tokenizer. Reads in a raw text document and returns a list of
     sentences each represented as a list of words. Text is converted to
     lower_case and newline characters are removed.
@@ -24,20 +23,30 @@ def doc_tokenizer(doc):
     Parameters
     ----------
     doc : str
-       A raw string document. 
+        doc is a document encoded as a string.
+    Returns
+    -------
+    list[list[str]]
+
     """
-    doc = doc.replace('\\n','').lower()
+    doc = doc.replace('\\n', '').lower()
     sentences = sent_tokenize(doc)
     doc_tokens = [word_tokenize(sentence) for sentence in sentences]
     return doc_tokens
 
-def get_wordnet_pos(treebank_tag):
+
+def get_wordnet_pos(treebank_tag: tuple[str, str]) -> str:
     """get_wordnet_pos. Converts a treebank POS tag to a wordnet POS tag.
 
     Parameters
     ----------
-    treebank_tag : (str, str)
-        First position is the token, second position is the treebank POS tag.
+    treebank_tag : tuple[str, str]
+        treebank_tag first position is the token, second position is the
+        treebank POS tag.
+
+    Returns
+    -------
+    str
     """
     if treebank_tag.startswith('J'):
         tag = wordnet.ADJ
@@ -51,42 +60,60 @@ def get_wordnet_pos(treebank_tag):
         tag = ''
     return tag
 
-def sentence_pos_tagger(sentence):
+
+def sentence_pos_tagger(sentence: list[str]) -> list[tuple[str, str]]:
     """sentence_pos_tagger. Takes a sentence as a list of tokens and returns a
     list of wordnet POS tagged tokens.
 
     Parameters
     ----------
-    sentence : list of strings
-        list of word tokens that form a sentence.
+    sentence : list[str]
+        sentence is a list of word tokens from a sentence.
+
+    Returns
+    -------
+    list[tuple[str, str]]
+
     """
     treebank_tags = pos_tag(sentence)
     wordnet_tags = [
-        (treebank_tag[0], get_wordnet_pos(treebank_tag[1])) for treebank_tag in treebank_tags
+        (treebank_tag[0], get_wordnet_pos(treebank_tag[1]))
+        for treebank_tag in treebank_tags
     ]
     return wordnet_tags
 
-def doc_pos_tagger(doc_tokens):
+
+def doc_pos_tagger(doc_tokens: list[list[str]]) -> list[list[tuple[str, str]]]:
     """doc_pos_tagger. Takes a tokenized document and returns POS tagged
     tokens.
 
     Parameters
     ----------
-    doc_tokens : list of list of strings
-        doc_tokens should be the output of doc_tokenizer.
+    doc_tokens : list[list[str]]
+        doc_tokens the output of doc_tokenizer.
+
+    Returns
+    -------
+    list[list[tuple[str, str]]]
+
     """
     pos_tags = [
         sentence_pos_tagger(sentence) for sentence in doc_tokens
     ]
     return pos_tags
 
-def tag_lemmatizer(pos_tag):
+
+def tag_lemmatizer(pos_tag: tuple[str, str]) -> str:
     """tag_lemmatizer. Takes a POS tagged word and returns its Lemma.
 
     Parameters
     ----------
-    pos_tag : (str, str)
-        First position is a word token, second position is a wordnet POS tag.
+    pos_tag : tuple[str, str]
+        pos_tag first position is a word token, second position is a wordnet POS tag.
+
+    Returns
+    -------
+    str
     """
     if pos_tag[1] != '':
         lemmatized_word = lemmatizer.lemmatize(pos_tag[0], pos_tag[1])
@@ -94,58 +121,82 @@ def tag_lemmatizer(pos_tag):
         lemmatized_word = pos_tag[0]
     return lemmatized_word
 
-def sentence_lemmatizer(sentence_tags):
+
+def sentence_lemmatizer(sentence_tags: list[tuple[str, str]]) -> list[str]:
     """sentence_lemmatizer. Takes a POS tagged sentence and lemmatizes.
 
     Parameters
     ----------
-    sentence_tags : list of tuples (str, str)
-        List of POS tagged tokens that form a sentence.
+    sentence_tags : list[tuple[str, str]]
+        sentence_tags list of POS tagged tokens that form a sentence.
+
+    Returns
+    -------
+    list[str]
+
     """
     lemmatized_sentence = [
         tag_lemmatizer(pos_tag) for pos_tag in sentence_tags
     ]
     return lemmatized_sentence
 
-def doc_lemmatizer(doc_tags):
-    """doc_lemmatizer. Lemmatize tagged words from a job doc and flatten sentence nesting.
+
+def doc_lemmatizer(doc_tags: list[list[tuple[str, str]]]) -> list[str]:
+    """doc_lemmatizer. Lemmatize tagged words from a job doc and flatten
+    sentence nesting.
 
     Parameters
     ----------
-    doc_tags : list of list of tuples (str, str)
-        Takes output from doc_pos_tagger.
+    doc_tags : list[list[tuple[str, str]]]
+        doc_tags output from doc_pos_tagger.
+
+    Returns
+    -------
+    list[str]
+
     """
     lemmatized_doc = []
     for sentence_tags in doc_tags:
-        lemmatized_sentence = sentence_lemmatizer(sentence_tags) 
+        lemmatized_sentence = sentence_lemmatizer(sentence_tags)
         lemmatized_doc.extend(lemmatized_sentence)
-    return lemmatized_doc    
+    return lemmatized_doc
 
-def doc_clean(lemmatized_doc):
+
+def doc_clean(lemmatized_doc: list[str]) -> list[str]:
     """doc_clean. Takes a lemmatized document, drops special characters and
     stopwords.
 
     Parameters
     ----------
-    lemmatized_doc : list of strings
-        Takes output from doc_lemmatizer.
+    lemmatized_doc : list[str]
+        lemmatized_doc output from doc_lemmatizer.
+
+    Returns
+    -------
+    list[str]
+
     """
     my_stopwords = stopwords.words('english')
     processed_doc = [
         word for word in lemmatized_doc
-        if word.isalpha() and word not in my_stopwords
-        and len(word)>1
+        if word.isalpha() and word not in my_stopwords and len(word)>1
     ]
     return processed_doc
 
-def doc_processor(doc):
+
+def doc_processor(doc: str) -> list[str]:
     """doc_processor. Executes full data processing pipeline on a document with
     the exception of bigram and trigram grouping.
 
     Parameters
     ----------
     doc : str
-        string containing the full text of your document.
+        doc is a  string containing the full text of your document.
+
+    Returns
+    -------
+    list[str]
+
     """
     doc_tokens = doc_tokenizer(doc)
     doc_tags = doc_pos_tagger(doc_tokens)
@@ -153,30 +204,43 @@ def doc_processor(doc):
     processed_doc = doc_clean(lemmatized_doc)
     return processed_doc
 
-def data_processor(docs):
+
+def data_processor(docs: list[str]) -> list[list[str]]:
     """data_processor. Takes a list of raw documents and executes full data
     processing pipeline for every document in the list.
 
     Parameters
     ----------
-    docs : list of str
-        List of strings containing the full text of your documents.
+    docs : list[str]
+        docs is a list of strings containing the full text of your documents.
+
+    Returns
+    -------
+    list[list[str]]
+
     """
     processed_data = [
         doc_processor(doc) for doc in docs
     ]
     return processed_data
 
-def data_combine_phrases(processed_data, prefix):
-    """data_combine_phrases. Takes a corpus of cleaned documents and combines common phrases into
-    bigrams, trigrams, and quadgrams.
+
+def data_combine_phrases(
+    processed_data: list[list[str]], prefix: str
+) -> list[list[str]]:
+    """data_combine_phrases. Takes a corpus of cleaned documents and combines
+    common phrases into bigrams, trigrams, and quadgrams.
 
     Parameters
     ----------
-    processed_data : list of strings
-        Takes output from data_processor.
-    prefix : string
+    processed_data : list[list[str]]
+        processed_data output from data processor.
+    prefix : str
         prefix to identify saved model.
+
+    Returns
+    -------
+    list[list[str]]
     """
     phrase_model_1 = Phrases(processed_data)
     phrase_model_1.save(f'../model/{prefix}-phrase_model_1.pkl')
@@ -185,17 +249,22 @@ def data_combine_phrases(processed_data, prefix):
     data_phrases = list(phrase_model_2[phrase_model_1[processed_data]])
     return data_phrases
 
-def doc_combine_phrases(processed_doc, prefix):
+
+def doc_combine_phrases(processed_doc: list[str], prefix: str) -> list[str]:
     """doc_combine_phrases. Takes a processed document and combines common
     phrases into bigrams, trigrams, and quadgrams. data_combine_phrases must
     run before doc_combine_phrases.
 
     Parameters
     ----------
-    processed_doc : list of strings
-        Takes output from doc_processor.
-    prefix : string
+    processed_doc : list[str]
+        processed_doc output from doc_processor,
+    prefix : str
         prefix to identify saved model.
+
+    Returns
+    -------
+    list[str]
     """
     try:
         phrase_model_1 = Phrases.load(f'../model/{prefix}-phrase_model_1.pkl')
@@ -203,6 +272,5 @@ def doc_combine_phrases(processed_doc, prefix):
     except:
         print('Call `data_combine_phrases` on processed data to build a phrase model')
         pass
-    doc_phrases = list(phrase_model_2[phrase_model_2[processed_doc]])
+    doc_phrases = list(phrase_model_2[phrase_model_1[processed_doc]])
     return doc_phrases
-
