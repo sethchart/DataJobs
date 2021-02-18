@@ -10,6 +10,7 @@ __license__ = "MIT"
 import sqlite3
 import pandas as pd
 
+
 class JobsDb(object):
 
     def __init__(self):
@@ -26,7 +27,8 @@ class JobsDb(object):
         self.cur.execute(jobs_create_query)
 
     def close(self):
-        """Closes the cursor and connection created by instantiating a JobsDb object."""
+        """Closes the cursor and connection created by instantiating a JobsDb
+        object."""
         self.cur.close()
         self.conn.close()
 
@@ -42,7 +44,8 @@ class JobsDb(object):
         return table_names
 
     def list_column_names(self, table_name):
-        """Given the name of a table in the data base, this function returns a list of column names.
+        """Given the name of a table in the data base, this function returns a
+        list of column names.
 
         Keyword Arguments:
         table_name -- name of the table whose columns will be listed.
@@ -72,7 +75,8 @@ class JobsDb(object):
         this function loads the table as as pandas dataframe.
 
         Keyword Arguments:
-        table_name -- name of tables whoes contents will be returned as a dataframe
+        table_name -- name of tables whose contents will be returned as a
+        dataframe
 
         Use the list_tables method to obtain a list of tables.
         """
@@ -81,12 +85,12 @@ class JobsDb(object):
             FROM {table_name};
             """
         df = self.load_query_as_df(query)
-        return df 
+        return df
 
     def write_row_to_table(self, table_name, row_dict):
-        """Given a table name and a dictionary with keys matching table column names
-        and values complying with column datatypes, this function writes a new row
-        to the specified table.
+        """Given a table name and a dictionary with keys matching table column
+        names and values complying with column datatypes, this function writes
+        a new row to the specified table.
 
         Keyword Arguments:
         table_name -- name of the table to write to.
