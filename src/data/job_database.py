@@ -13,8 +13,8 @@ import pandas as pd
 
 class JobsDb(object):
 
-    def __init__(self):
-        self.conn = sqlite3.connect('../data/jobs.sqlite')
+    def __init__(self, path_to_db):
+        self.conn = sqlite3.connect(path_to_db)
         self.cur = self.conn.cursor()
         jobs_create_query = """
         CREATE TABLE IF NOT EXISTS jobs (
