@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import click
 import logging
+from definitions import ROOT_DIR
 from pathlib import Path
-from dotenv import find_dotenv, load_dotenv
+# from dotenv import find_dotenv, load_dotenv
 
 
 @click.command()
@@ -14,6 +15,10 @@ def main(input_filepath, output_filepath):
     """
     logger = logging.getLogger(__name__)
     logger.info('making final data set from raw data')
+    with open(ROOT_DIR+'/src/data/make_dataset.sql', mode='r') as file:
+        query = file.read()
+
+    print(query)
 
 
 if __name__ == '__main__':
@@ -25,6 +30,6 @@ if __name__ == '__main__':
 
     # find .env automagically by walking up directories until it's found, then
     # load up the .env entries as environment variables
-    load_dotenv(find_dotenv())
+    # load_dotenv(find_dotenv())
 
     main()

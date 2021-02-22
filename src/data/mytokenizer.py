@@ -18,16 +18,27 @@ POS_Tag = Tuple[str, str]
 
 
 class LemmaTokenizer:
+    """LemmaTokenizer. Provides text cleaning and lemmatization as a tokenizer
+    for use with CountVectorizer.
+    """
 
     def __init__(self):
+        """__init__.
+        """
         self.lemmatizer = WordNetLemmatizer()
 
     def __call__(self, doc):
+        """__call__.
+
+        Parameters
+        ----------
+        doc :
+            doc is a document encoded as a string.
+        """
         return self.doc_lemmatizer(doc)
 
     def doc_lemmatizer(self, doc: str) -> List[str]:
-        """doc_lemmatizer. Lemmatize tagged words from a job doc and flatten
-        sentence nesting.
+        """doc_lemmatizer. Lemmatize tagged words from the provided doc.
 
         Parameters
         ----------
@@ -49,7 +60,9 @@ class LemmaTokenizer:
         return lemmatized_doc
 
     def doc_tagger(self, doc: str) -> List[List[POS_Tag]]:
-        """doc_tagger. Takes a document and returns POS tagged tokens.
+        """doc_tagger. Takes a document and returns parts of speech tagged
+        tokens organized as a list of sentences each of which is a list of POS
+        tagged words.
 
         Parameters
         ----------
@@ -91,7 +104,7 @@ class LemmaTokenizer:
     def doc_tokenizer(self, doc: str) -> List[List[str]]:
         """doc_tokenizer. Reads in a raw text document and returns a list of
         sentences each represented as a list of words. Text is converted to
-        lower_case and newline characters are removed.
+        lowercase and newline characters are removed.
 
         Parameters
         ----------
@@ -109,24 +122,13 @@ class LemmaTokenizer:
         return doc_tokens
 
     def sentence_lemmatizer(self, sentence_tags: List[POS_Tag]) -> List[str]:
-        """sentence_lemmatizer.
+        """sentence_lemmatizer. Takes a POS tagged sentence and returns a list
+        of word lemmas.
 
         Parameters
         ----------
         sentence_tags : List[POS_Tag]
-            sentence_tags
-
-        Returns
-        -------
-        List[str]
-
-        """
-        """sentence_lemmatizer. Takes a POS tagged sentence and lemmatizes.
-
-        Parameters
-        ----------
-        sentence_tags : List[POS_Tag]
-            sentence_tags list of POS tagged tokens that form a sentence.
+            sentence_tags is a list of POS tagged tokens that for a sentence.
 
         Returns
         -------
@@ -165,7 +167,7 @@ class LemmaTokenizer:
         return tag
 
     def lemmatize(self, pos_tag: POS_Tag) -> str:
-        """lemmatize. Takes a POS tagged word and returns its Lemma.
+        """lemmatize. Takes a POS tagged word and returns its lemma.
 
         Parameters
         ----------
