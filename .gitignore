@@ -128,5 +128,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Glove model
-model/glove*
+# Data Folder
+data/
