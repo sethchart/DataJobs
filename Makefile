@@ -32,6 +32,10 @@ raw_data: requirements
 ## Make processed dataset from raw dataset
 processed_data: requirements
 	$(PYTHON_INTERPRETER) src/data/make_processed_data.py data/raw data/processed
+	
+## Make a gridsearch over LDA hyper-parameters
+lda_gridsearch: requirements
+	$(PYTHON_INTERPRETER) src/models/make_lda_gridsearch.py data/processed models/lda
 
 ## Delete all compiled Python files
 clean:

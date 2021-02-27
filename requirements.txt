@@ -1,2 +1,4 @@
 -e .
 nltk
+flake8
+joblib
