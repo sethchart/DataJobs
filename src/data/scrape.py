@@ -7,8 +7,8 @@ __author__ = "Seth Chart"
 __version__ = "0.1.0"
 __license__ = "MIT"
 
-from job_database import JobsDb
-from careerjet import Driver
+from src.data.job_database import JobsDb
+from src.data.careerjet import Driver
 from timeit import default_timer
 from time import sleep
 from numpy.random import rand

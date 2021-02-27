@@ -2,3 +2,7 @@
 nltk
 flake8
 joblib
+gensim
+selenium
+plotly
+wordcloud
