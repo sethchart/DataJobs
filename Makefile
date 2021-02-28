@@ -29,9 +29,13 @@ requirements: test_environment
 raw_data: requirements
 	$(PYTHON_INTERPRETER) src/data/make_raw_data.py data/external data/raw 
 
-## Make processed dataset from raw dataset
+## Make interim dataset from raw dataset
+interim_data: requirements
+	$(PYTHON_INTERPRETER) src/data/make_interim_data.py data/raw data/interim
+	
+## Make interim dataset from raw dataset
 processed_data: requirements
-	$(PYTHON_INTERPRETER) src/data/make_processed_data.py data/raw data/processed
+	$(PYTHON_INTERPRETER) src/features/build_features.py data/interim data/processed
 	
 ## Make a gridsearch over LDA hyper-parameters
 lda_gridsearch: requirements
